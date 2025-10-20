@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9x9 Grid Inner Glow</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(9, 30px);
+            grid-template-rows: repeat(9, 30px);
+            gap: 2px;
+            background-color: #333;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .square {
+            background-color: #555;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.9s ease-in-out;
+        }
+        /* 發光類別 */
+        .glowing {
+            background: linear-gradient(45deg, #fff, #66ccff) !important;
+        }
+        /* fade in/out 使用 JS 控制 */
+    </style>
+</head>
+<body>
+    <div class="grid-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.grid-container');
+            const subGrids = {
+                'left-top': [],
+                'center-top': [],
+                'right-top': [],
+                'left-middle': [],
+                'center-middle': [],
+                'right-middle': [],
+                'left-bottom': [],
+                'center-bottom': [],
+                'right-bottom': []
+            };
+            for (let i = 0; i < 81; i++) {
+                const square = document.createElement('div');
+                square.classList.add('square');
+                const row = Math.floor(i / 9); // 0-based row
+                const col = i % 9; // 0-based column
+                let subGridKey;
+                if (col < 3) {
+                    if (row < 3) subGridKey = 'left-top';
+                    else if (row < 6) subGridKey = 'left-middle';
+                    else subGridKey = 'left-bottom';
+                } else if (col < 6) {
+                    if (row < 3) subGridKey = 'center-top';
+                    else if (row < 6) subGridKey = 'center-middle';
+                    else subGridKey = 'center-bottom';
+                } else {
+                    if (row < 3) subGridKey = 'right-top';
+                    else if (row < 6) subGridKey = 'right-middle';
+                    else subGridKey = 'right-bottom';
+                }
+                square.dataset.subGrid = subGridKey;
+                subGrids[subGridKey].push(square);
+                container.appendChild(square);
+            }
+
+            const order = [
+                'left-top', 'center-top', 'right-top',
+                'left-middle', 'center-middle', 'right-middle',
+                'left-bottom', 'center-bottom', 'right-bottom'
+            ];
+
+            function animateSubGrid(index) {
+                if (index >= order.length) {
+                    index = 0;
+                }
+                const key = order[index];
+                const squares = subGrids[key];
+                squares.forEach(square => square.classList.add('glowing'));
+                setTimeout(() => {
+                    squares.forEach(square => {
+                        square.style.transition = 'background 0.9s ease-in-out';
+                        square.classList.remove('glowing');
+                    });
+                    setTimeout(() => {
+                        animateSubGrid(index + 1);
+                    }, 900); // 等待 fade out 完成後開始下一個
+                }, 900); // fade in 後等待 0.9s 開始 fade out
+            }
+
+            animateSubGrid(0);
+        });
+    </script>
+</body>
+</html>
